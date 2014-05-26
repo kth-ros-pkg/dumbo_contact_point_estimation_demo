@@ -1,0 +1,182 @@
+#!/usr/bin/env python
+
+#   dumbo_contact_point_estimation_demo
+#
+#   Created on: May 26, 2014
+#   Authors:   Francisco Vina
+#             fevb <at> kth.se
+#
+
+#  Copyright (c) 2014, Francisco Vina, CVAP, KTH
+#    All rights reserved.
+
+#    Redistribution and use in source and binary forms, with or without
+#    modification, are permitted provided that the following conditions are met:
+#       * Redistributions of source code must retain the above copyright
+#         notice, this list of conditions and the following disclaimer.
+#       * Redistributions in binary form must reproduce the above copyright
+#         notice, this list of conditions and the following disclaimer in the
+#         documentation and/or other materials provided with the distribution.
+#       * Neither the name of KTH nor the
+#         names of its contributors may be used to endorse or promote products
+#         derived from this software without specific prior written permission.
+
+#    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+#    ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+#    WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+#    DISCLAIMED. IN NO EVENT SHALL KTH BE LIABLE FOR ANY
+#    DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+#    (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+#    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+#    ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+#    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+#    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+#
+import sys
+
+import rospy
+import moveit_commander
+from robotiq_s_model_control_client.robotiq_s_model_control_client import RobotiqSModelControlClient
+from geometry_msgs.msg import PointStamped
+from std_srvs.srv import Empty
+import numpy
+from numpy import linalg
+
+
+p1 = numpy.array([0.5, 0.0, 0.0])
+p2 = numpy.array([-0.5, 0.0, 0.0])
+
+p1_detected = False
+p2_detected = False
+
+p = numpy.array([0.0, 0.0, 0.0])
+
+def contact_point_callback(msg):
+
+    global p
+    p = numpy.array([msg.point.x, msg.point.y, msg.point.z])
+
+    global p1, p2
+
+    d1 = linalg.norm(p-p1)
+    d2 = linalg.norm(p-p2)
+
+    threshold = 0.05
+    global p1_detected, p2_detected
+
+    # detecting
+    if d1< threshold:
+        p1_detected = True
+        p2_detected = False
+
+
+    elif d2<threshold:
+        p1_detected = False
+        p2_detected = True
+
+    else:
+        p1_detected = False
+        p2_detected = False
+
+
+
+
+if __name__ == "__main__":
+    rospy.init_node('dumbo_contact_point_estimation_demo')
+
+
+    robotiq_hand = RobotiqSModelControlClient()
+
+    moveit_commander.roscpp_initialize(sys.argv)
+    left_arm = moveit_commander.MoveGroupCommander("left_arm")
+    right_arm = moveit_commander.MoveGroupCommander("right_arm")
+
+    rospy.sleep(0.5)
+
+    # move arm to joint position 1
+    q1_left = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    q1_right = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+
+    # activate the hand
+    robotiq_hand.activate()
+
+    # move arms to position 1
+    rospy.loginfo('moving arms to initial joint position')
+    left_arm.set_joint_value_target(q1_left)
+    left_arm.go()
+
+    right_arm.set_joint_value_target(q1_right)
+    right_arm.go()
+
+    rospy.sleep(5.0)
+
+    # close the hand
+    rospy.loginfo('closing the hand')
+    robotiq_hand.close()
+    rospy.sleep(3.0)
+
+    contact_point_subscriber = rospy.Subscriber('/contact_point_estimation/contact_point_estimate',
+                                                PointStamped,
+                                                contact_point_callback)
+
+    # wait for contact point estimation start service
+    cpe_start_srv_name = "/contact_point_estimation/start"
+    cpe_stop_srv_name = "/contact_point_estimation/stop"
+
+    rospy.loginfo('waiting for contact point estimation start srv')
+    rospy.wait_for_service(cpe_start_srv_name)
+
+    # start contact point estimator
+    try:
+        start_cpe_srv = rospy.ServiceProxy(cpe_start_srv_name, Empty)
+        start_cpe_srv()
+
+    except rospy.ServiceException, e:
+        rospy.logerr('Error starting contact point estimation')
+        sys.exit(0)
+
+    rospy.loginfo('contact point estimation started')
+
+    # waiting for stop service
+    rospy.loginfo('waiting for contact point estimation stop srv')
+    rospy.wait_for_service(cpe_stop_srv_name)
+    rospy.loginfo('stop contact point estimation srv online')
+
+    stop_cpe_srv = rospy.ServiceProxy(cpe_stop_srv_name, Empty)
+
+
+
+    pos = [255, 255, 255]
+    speed = [150, 150, 150]
+    force = [150, 150, 150]
+
+    r = rospy.Rate(10)
+
+    while not rospy.is_shutdown():
+
+        # if contact point estimator diverges too much, reset it
+        if linalg.norm(p) > 2.0:
+
+            p = numpy.array([0.0, 0.0, 0.0])
+            stop_cpe_srv()
+            rospy.sleep(0.5)
+            start_cpe_srv()
+            rospy.sleep(0.5)
+
+
+        if p1_detected:
+            pos = [255, 0, 255]
+            robotiq_hand.goto_pos(pos, speed, force)
+
+        elif p2_detected:
+            pos = [255, 255, 0]
+            robotiq_hand.goto_pos(pos, speed, force)
+
+        else:
+            robotiq_hand.close()
+
+        r.sleep()
+
+
+

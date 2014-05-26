@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!-- launch the python script for running the demo -->
+  <node name="dumbo_contact_point_estimation_demo" pkg="dumbo_contact_point_estimation_demo" type="dumbo_contact_point_estimation_demo" cwd="node" respawn="false" output="screen" >
+  </node>
+
+  <!-- launch rviz -->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find dumbo_contact_point_estimation_demo)/config/dumbo_contact_point_estimation_demo.vcg" />
+
+  <!-- launch the contact point estimator -->
+  <include file="$(find contact_point_estimation)/launch/contact_point_estimation.launch" >
+    <arg name="ft_sensor_topic" value="/$(arg arm)_arm_ft_sensor/ft_compensated"/>
+  </include>
+
+</launch>
