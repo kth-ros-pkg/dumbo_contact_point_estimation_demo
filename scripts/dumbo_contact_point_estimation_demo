@@ -48,11 +48,13 @@ import numpy
 from numpy import linalg
 
 
-p1 = numpy.array([0.5, 0.0, 0.0])
-p2 = numpy.array([-0.5, 0.0, 0.0])
+p1 = numpy.array([-0.2, 0.0, 0.15])
+p2 = numpy.array([0.2, 0.0, 0.15])
+p3 = numpy.array([0.0,0.0,0.2])
 
 p1_detected = False
 p2_detected = False
+p3_detected = False
 
 p = numpy.array([0.0, 0.0, 0.0])
 
@@ -61,27 +63,38 @@ def contact_point_callback(msg):
     global p
     p = numpy.array([msg.point.x, msg.point.y, msg.point.z])
 
-    global p1, p2
+    global p1, p2, p3
 
     d1 = linalg.norm(p-p1)
     d2 = linalg.norm(p-p2)
+    d3 = linalg.norm(p-p3)
 
-    threshold = 0.05
-    global p1_detected, p2_detected
+    threshold = 0.12
+    global p1_detected, p2_detected, p3_detected
 
     # detecting
     if d1< threshold:
         p1_detected = True
         p2_detected = False
+        p3_detected = False
 
 
     elif d2<threshold:
         p1_detected = False
         p2_detected = True
+        p3_detected = False
+
+
+    elif d3<threshold:
+        p1_detected = False
+        p2_detected = False
+        p3_detected = True
 
     else:
         p1_detected = False
         p2_detected = False
+        p3_detected = False
+
 
 
 
@@ -164,6 +177,8 @@ def main():
 
     p1_executed = False
     p2_executed = False
+    p3_executed = False
+
     hand_closed = False
 
     joint_vel_msg = JointVelocities()
@@ -183,7 +198,7 @@ def main():
     while not rospy.is_shutdown():
 
         # if contact point estimator diverges too much, reset it
-        global p, p1_detected, p2_detected
+        global p, p1_detected, p2_detected, p3_detected
         if linalg.norm(p) > 2.0:
 
             rospy.logwarn('contact point estimate diverging, resetting estimator')
@@ -197,28 +212,41 @@ def main():
         if p1_detected:
             pos = [255, 0, 255]
             if not p1_executed:
-                # robotiq_hand.goto_pos(pos, speed, force)
+                robotiq_hand.goto_pos(pos, speed, force)
                 rospy.loginfo('p1 detected')
                 p1_executed = True
                 p2_executed = False
+                p3_executed = False
                 hand_closed = False
 
         elif p2_detected:
             pos = [255, 255, 0]
             if not p2_executed:
                 rospy.loginfo('p2 detected')
-                # robotiq_hand.goto_pos(pos, speed, force)
+                robotiq_hand.goto_pos(pos, speed, force)
                 p1_executed = False
                 p2_executed = True
+                p3_executed = False
+                hand_closed = False
+
+        elif p3_detected:
+            pos = [0, 255, 255]
+            if not p3_executed:
+                rospy.loginfo('p3 detected')
+                robotiq_hand.goto_pos(pos, speed, force)
+                p1_executed = False
+                p2_executed = False
+                p3_executed = True
                 hand_closed = False
 
 
         else:
             if not hand_closed:
                 rospy.loginfo('no p detected')
-                # robotiq_hand.close()
+                robotiq_hand.close()
                 p1_executed = False
                 p2_executed = False
+                p3_executed = False
                 hand_closed = True
 
         joint_vel_counter = joint_vel_counter+1
