@@ -95,11 +95,16 @@ if __name__ == "__main__":
     rospy.sleep(0.5)
 
     # move arm to joint position 1
-    q1_left = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-    q1_right = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    q1_left = [0.33983537554740906, -1.103785753250122, -0.2787661552429199, -1.4815603494644165, 0.34517112374305725, 0.8535343408584595, 0.10593769699335098]
+
+    q1_right = [-1.016191840171814, 0.7127087116241455, 1.2064599990844727, 1.7897939682006836, 1.0101473331451416, 1.2317262887954712, -0.11066146939992905]
+
 
     # activate the hand
     robotiq_hand.activate()
+
+    # Set basic grasping mode
+    robotiq_hand.set_grasping_mode(robotiq_hand.GM_basic)
 
     # move arms to position 1
     rospy.loginfo('moving arms to initial joint position')
@@ -109,7 +114,7 @@ if __name__ == "__main__":
     right_arm.set_joint_value_target(q1_right)
     right_arm.go()
 
-    rospy.sleep(5.0)
+    rospy.sleep(3.0)
 
     # close the hand
     rospy.loginfo('closing the hand')
@@ -119,6 +124,8 @@ if __name__ == "__main__":
     contact_point_subscriber = rospy.Subscriber('/contact_point_estimation/contact_point_estimate',
                                                 PointStamped,
                                                 contact_point_callback)
+
+    rospy.sleep(0.5)
 
     # wait for contact point estimation start service
     cpe_start_srv_name = "/contact_point_estimation/start"
@@ -153,11 +160,16 @@ if __name__ == "__main__":
 
     r = rospy.Rate(10)
 
+    p1_executed = False
+    p2_executed = False
+    hand_closed = False
+
     while not rospy.is_shutdown():
 
         # if contact point estimator diverges too much, reset it
         if linalg.norm(p) > 2.0:
 
+            rospy.logwarn('contact point estimate diverging, resetting estimator')
             p = numpy.array([0.0, 0.0, 0.0])
             stop_cpe_srv()
             rospy.sleep(0.5)
@@ -167,14 +179,30 @@ if __name__ == "__main__":
 
         if p1_detected:
             pos = [255, 0, 255]
-            robotiq_hand.goto_pos(pos, speed, force)
+            if not p1_executed:
+                # robotiq_hand.goto_pos(pos, speed, force)
+                rospy.loginfo('p1 detected')
+                p1_executed = True
+                p2_executed = False
+                hand_closed = False
 
         elif p2_detected:
             pos = [255, 255, 0]
-            robotiq_hand.goto_pos(pos, speed, force)
+            if not p2_executed:
+                rospy.loginfo('p2 detected')
+                # robotiq_hand.goto_pos(pos, speed, force)
+                p1_executed = False
+                p2_executed = True
+                hand_closed = False
+
 
         else:
-            robotiq_hand.close()
+            if not hand_closed:
+                rospy.loginfo('no p detected')
+                # robotiq_hand.close()
+                p1_executed = False
+                p2_executed = False
+                hand_closed = True
 
         r.sleep()
 
