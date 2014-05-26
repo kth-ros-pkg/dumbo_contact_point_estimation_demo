@@ -34,12 +34,16 @@
 
 #
 import sys
+import brics_actuator
 
 import rospy
 import moveit_commander
 from robotiq_s_model_control_client.robotiq_s_model_control_client import RobotiqSModelControlClient
 from geometry_msgs.msg import PointStamped
 from std_srvs.srv import Empty
+from brics_actuator.msg import JointVelocities
+from brics_actuator.msg import JointValue
+
 import numpy
 from numpy import linalg
 
@@ -81,14 +85,13 @@ def contact_point_callback(msg):
 
 
 
-
-if __name__ == "__main__":
-    rospy.init_node('dumbo_contact_point_estimation_demo')
+def main():
+    rospy.init_node('demo')
 
 
     robotiq_hand = RobotiqSModelControlClient()
 
-    moveit_commander.roscpp_initialize(sys.argv)
+    # moveit_commander.roscpp_initialize(sys.argv)
     left_arm = moveit_commander.MoveGroupCommander("left_arm")
     right_arm = moveit_commander.MoveGroupCommander("right_arm")
 
@@ -153,20 +156,34 @@ if __name__ == "__main__":
     stop_cpe_srv = rospy.ServiceProxy(cpe_stop_srv_name, Empty)
 
 
-
     pos = [255, 255, 255]
     speed = [150, 150, 150]
     force = [150, 150, 150]
 
-    r = rospy.Rate(10)
+    r = rospy.Rate(600)
 
     p1_executed = False
     p2_executed = False
     hand_closed = False
 
+    joint_vel_msg = JointVelocities()
+    joint_value = [JointValue() for x in xrange(0,7)]
+
+    for x in xrange(0,7):
+        joint_value[x].joint_uri = "left_arm_"+str(x+1)+"_joint"
+        joint_value[x].value = 0.0
+        joint_value[x].unit = 'rad'
+        joint_value[x].timeStamp = rospy.Time.now()
+
+    joint_vel_msg.velocities = joint_value
+
+    joint_vel_publisher = rospy.Publisher('/left_arm_controller/command_vel', JointVelocities)
+    joint_vel_counter = 0
+
     while not rospy.is_shutdown():
 
         # if contact point estimator diverges too much, reset it
+        global p, p1_detected, p2_detected
         if linalg.norm(p) > 2.0:
 
             rospy.logwarn('contact point estimate diverging, resetting estimator')
@@ -204,7 +221,16 @@ if __name__ == "__main__":
                 p2_executed = False
                 hand_closed = True
 
+        joint_vel_counter = joint_vel_counter+1
+        if(joint_vel_counter==3):
+            joint_vel_counter = 0
+            joint_vel_publisher.publish(joint_vel_msg)
+
         r.sleep()
+
+if __name__ == "__main__":
+    main()
+
 
 
 
