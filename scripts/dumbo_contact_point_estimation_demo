@@ -50,7 +50,7 @@ from numpy import linalg
 
 p1 = numpy.array([-0.2, 0.0, 0.15])
 p2 = numpy.array([0.2, 0.0, 0.15])
-p3 = numpy.array([0.0,0.0,0.2])
+p3 = numpy.array([0.0,0.0,0.25])
 
 p1_detected = False
 p2_detected = False
