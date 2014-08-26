@@ -102,7 +102,7 @@ def main():
     rospy.init_node('demo')
 
 
-    robotiq_hand = RobotiqSModelControlClient()
+    # robotiq_hand = RobotiqSModelControlClient()
 
     # moveit_commander.roscpp_initialize(sys.argv)
     left_arm = moveit_commander.MoveGroupCommander("left_arm")
@@ -117,25 +117,25 @@ def main():
 
 
     # activate the hand
-    robotiq_hand.activate()
+    # robotiq_hand.activate()
 
     # Set basic grasping mode
-    robotiq_hand.set_grasping_mode(robotiq_hand.GM_basic)
+    # robotiq_hand.set_grasping_mode(robotiq_hand.GM_basic)
 
     # move arms to position 1
     rospy.loginfo('moving arms to initial joint position')
     left_arm.set_joint_value_target(q1_left)
-    left_arm.go()
+    # left_arm.go()
 
     right_arm.set_joint_value_target(q1_right)
-    right_arm.go()
+    # right_arm.go()
 
     rospy.sleep(3.0)
 
     # close the hand
-    rospy.loginfo('closing the hand')
-    robotiq_hand.close()
-    rospy.sleep(3.0)
+    # rospy.loginfo('closing the hand')
+    # robotiq_hand.close()
+    # rospy.sleep(3.0)
 
     contact_point_subscriber = rospy.Subscriber('/contact_point_estimation/contact_point_estimate',
                                                 PointStamped,
@@ -209,45 +209,45 @@ def main():
             rospy.sleep(0.5)
 
 
-        if p1_detected:
-            pos = [255, 0, 255]
-            if not p1_executed:
-                robotiq_hand.goto_pos(pos, speed, force)
-                rospy.loginfo('p1 detected')
-                p1_executed = True
-                p2_executed = False
-                p3_executed = False
-                hand_closed = False
+        # if p1_detected:
+        #     pos = [255, 0, 255]
+        #     if not p1_executed:
+        #         robotiq_hand.goto_pos(pos, speed, force)
+        #         rospy.loginfo('p1 detected')
+        #         p1_executed = True
+        #         p2_executed = False
+        #         p3_executed = False
+        #         hand_closed = False
 
-        elif p2_detected:
-            pos = [255, 255, 0]
-            if not p2_executed:
-                rospy.loginfo('p2 detected')
-                robotiq_hand.goto_pos(pos, speed, force)
-                p1_executed = False
-                p2_executed = True
-                p3_executed = False
-                hand_closed = False
+        # elif p2_detected:
+        #     pos = [255, 255, 0]
+        #     if not p2_executed:
+        #         rospy.loginfo('p2 detected')
+        #         robotiq_hand.goto_pos(pos, speed, force)
+        #         p1_executed = False
+        #         p2_executed = True
+        #         p3_executed = False
+        #         hand_closed = False
 
-        elif p3_detected:
-            pos = [0, 255, 255]
-            if not p3_executed:
-                rospy.loginfo('p3 detected')
-                robotiq_hand.goto_pos(pos, speed, force)
-                p1_executed = False
-                p2_executed = False
-                p3_executed = True
-                hand_closed = False
+        # elif p3_detected:
+        #     pos = [0, 255, 255]
+        #     if not p3_executed:
+        #         rospy.loginfo('p3 detected')
+        #         robotiq_hand.goto_pos(pos, speed, force)
+        #         p1_executed = False
+        #         p2_executed = False
+        #         p3_executed = True
+        #         hand_closed = False
 
 
-        else:
-            if not hand_closed:
-                rospy.loginfo('no p detected')
-                robotiq_hand.close()
-                p1_executed = False
-                p2_executed = False
-                p3_executed = False
-                hand_closed = True
+        # else:
+        #     if not hand_closed:
+        #         rospy.loginfo('no p detected')
+        #         robotiq_hand.close()
+        #         p1_executed = False
+        #         p2_executed = False
+        #         p3_executed = False
+        #         hand_closed = True
 
         joint_vel_counter = joint_vel_counter+1
         if(joint_vel_counter==3):

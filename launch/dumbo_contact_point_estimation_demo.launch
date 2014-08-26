@@ -13,7 +13,7 @@
   <node name="contact_point_estimation" pkg="contact_point_estimation" type="contact_point_estimation_node" cwd="node" respawn="false" >
     <rosparam command="load" file="$(find contact_point_estimation)/config/contact_point_estimator.yaml"/>
     <rosparam command="load" file="$(find contact_point_estimation)/config/surface_normal_estimator.yaml"/>
-    <remap from="/contact_point_estimation/ft_compensated" to="/$(arg arm)_arm_ft_sensor/ft_compensated"/>
+    <remap from="/contact_point_estimation/ft_compensated" to="/$(arg arm)_arm_ft_sensor/ft_drift_compensated"/>
   </node>
 
 </launch>
