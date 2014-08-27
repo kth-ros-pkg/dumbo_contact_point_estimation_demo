@@ -204,9 +204,9 @@ def main():
             rospy.logwarn('contact point estimate diverging, resetting estimator')
             p = numpy.array([0.0, 0.0, 0.0])
             stop_cpe_srv()
-            rospy.sleep(0.5)
+            # rospy.sleep(0.5)
             start_cpe_srv()
-            rospy.sleep(0.5)
+            # rospy.sleep(0.5)
 
 
         # if p1_detected:

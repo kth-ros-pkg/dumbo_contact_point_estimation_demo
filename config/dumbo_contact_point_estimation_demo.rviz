@@ -7,6 +7,9 @@ Panels:
         - /Global Options1
         - /Status1
         - /PointStamped1
+        - /PointCloud21
+        - /TF1
+        - /TF1/Frames1
       Splitter Ratio: 0.5
     Tree Height: 565
   - Class: rviz/Selection
@@ -27,7 +30,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: ""
+    SyncSource: PointCloud2
 Visualization Manager:
   Class: ""
   Displays:
@@ -284,10 +287,216 @@ Visualization Manager:
       Radius: 0.08
       Topic: /contact_point_estimation/contact_point_estimate
       Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: RGB8
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: PointCloud2
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.01
+      Style: Flat Squares
+      Topic: /camera/depth_registered/points
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: true
+    - Class: rviz/TF
+      Enabled: true
+      Frame Timeout: 15
+      Frames:
+        All Enabled: false
+        accelerometer:
+          Value: false
+        arm_base_link:
+          Value: false
+        base_link:
+          Value: false
+        camera_depth_frame:
+          Value: false
+        camera_depth_optical_frame:
+          Value: false
+        camera_link:
+          Value: false
+        camera_rgb_frame:
+          Value: false
+        camera_rgb_optical_frame:
+          Value: false
+        imu:
+          Value: false
+        left_arm_0_link:
+          Value: false
+        left_arm_1_link:
+          Value: false
+        left_arm_2_link:
+          Value: false
+        left_arm_3_link:
+          Value: false
+        left_arm_4_link:
+          Value: false
+        left_arm_5_link:
+          Value: false
+        left_arm_6_link:
+          Value: false
+        left_arm_7_link:
+          Value: false
+        left_arm_bottom_finger_link:
+          Value: false
+        left_arm_ft_sensor:
+          Value: false
+        left_arm_tool_link:
+          Value: false
+        left_arm_top_finger_link:
+          Value: false
+        parallel_gripper_com:
+          Value: false
+        right_arm_0_link:
+          Value: false
+        right_arm_1_link:
+          Value: false
+        right_arm_2_link:
+          Value: false
+        right_arm_3_link:
+          Value: false
+        right_arm_4_link:
+          Value: false
+        right_arm_5_link:
+          Value: false
+        right_arm_6_link:
+          Value: false
+        right_arm_7_link:
+          Value: false
+        right_arm_ft_sensor:
+          Value: false
+        robotiq_com:
+          Value: false
+        robotiq_finger_1_link_0:
+          Value: false
+        robotiq_finger_1_link_1:
+          Value: false
+        robotiq_finger_1_link_2:
+          Value: false
+        robotiq_finger_1_link_3:
+          Value: false
+        robotiq_finger_2_link_0:
+          Value: false
+        robotiq_finger_2_link_1:
+          Value: false
+        robotiq_finger_2_link_2:
+          Value: false
+        robotiq_finger_2_link_3:
+          Value: false
+        robotiq_finger_middle_link_0:
+          Value: false
+        robotiq_finger_middle_link_1:
+          Value: false
+        robotiq_finger_middle_link_2:
+          Value: false
+        robotiq_finger_middle_link_3:
+          Value: false
+        robotiq_palm:
+          Value: false
+        torso_back_plate_link:
+          Value: false
+        torso_front_plate_link:
+          Value: false
+        torso_link:
+          Value: false
+        torso_middle_plate_link:
+          Value: false
+        torso_top_plate_link:
+          Value: false
+      Marker Scale: 1
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+      Show Names: true
+      Tree:
+        base_link:
+          torso_link:
+            torso_middle_plate_link:
+              arm_base_link:
+                accelerometer:
+                  imu:
+                    {}
+                camera_link:
+                  camera_depth_frame:
+                    camera_depth_optical_frame:
+                      {}
+                  camera_rgb_frame:
+                    camera_rgb_optical_frame:
+                      {}
+                left_arm_0_link:
+                  left_arm_1_link:
+                    left_arm_2_link:
+                      left_arm_3_link:
+                        left_arm_4_link:
+                          left_arm_5_link:
+                            left_arm_6_link:
+                              left_arm_7_link:
+                                left_arm_ft_sensor:
+                                  parallel_gripper_com:
+                                    {}
+                                left_arm_tool_link:
+                                  left_arm_bottom_finger_link:
+                                    {}
+                                  left_arm_top_finger_link:
+                                    {}
+                right_arm_0_link:
+                  right_arm_1_link:
+                    right_arm_2_link:
+                      right_arm_3_link:
+                        right_arm_4_link:
+                          right_arm_5_link:
+                            right_arm_6_link:
+                              right_arm_7_link:
+                                right_arm_ft_sensor:
+                                  robotiq_com:
+                                    {}
+                                robotiq_palm:
+                                  robotiq_finger_1_link_0:
+                                    robotiq_finger_1_link_1:
+                                      robotiq_finger_1_link_2:
+                                        robotiq_finger_1_link_3:
+                                          {}
+                                  robotiq_finger_2_link_0:
+                                    robotiq_finger_2_link_1:
+                                      robotiq_finger_2_link_2:
+                                        robotiq_finger_2_link_3:
+                                          {}
+                                  robotiq_finger_middle_link_0:
+                                    robotiq_finger_middle_link_1:
+                                      robotiq_finger_middle_link_2:
+                                        robotiq_finger_middle_link_3:
+                                          {}
+              torso_back_plate_link:
+                {}
+              torso_front_plate_link:
+                {}
+              torso_top_plate_link:
+                {}
+      Update Interval: 0
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: /base_link
+    Fixed Frame: base_link
+    Frame Rate: 30
   Name: root
   Tools:
     - Class: rviz/Interact
@@ -307,17 +516,22 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 3.59635
+      Distance: 5.05261
+      Enable Stereo Rendering:
+        Stereo Eye Separation: 0.06
+        Stereo Focal Distance: 1
+        Swap Stereo Eyes: false
+        Value: false
       Focal Point:
-        X: 0.132598
-        Y: -0.170713
-        Z: 0.206164
+        X: -0.0965941
+        Y: 0.292148
+        Z: 0.419214
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 0.545398
+      Pitch: 0.785398
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 1.8354
+      Yaw: 4.76859
     Saved: ~
 Window Geometry:
   Displays:
@@ -335,5 +549,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1200
-  X: 46
+  X: 39
   Y: 60
